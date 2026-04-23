@@ -4,6 +4,9 @@
 *.out
 a.out
 
+# Java compiled files
+*.class
+
 # Build directories
 build/
 bin/
