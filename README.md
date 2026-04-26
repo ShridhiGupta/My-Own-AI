@@ -1,6 +1,6 @@
-# VectorDB — Build a Vector Database from Scratch in C++
+# VectorDB — Build a Vector Database from Scratch in Java
 
-A fully working **Vector Database** built from scratch in C++ with a web UI.  
+A fully working **Vector Database** built from scratch in Java with a web UI.  
 Implements **HNSW**, **KD-Tree**, and **Brute Force** search algorithms side-by-side, plus a **RAG pipeline** powered by a local LLM via Ollama.
 
 > Built as an educational project to show how production vector databases like Pinecone, Weaviate, and Chroma actually work under the hood.
@@ -18,6 +18,7 @@ Implements **HNSW**, **KD-Tree**, and **Brute Force** search algorithms side-by-
 | **Real Document Embedding** | Paste any text → Ollama embeds it with `nomic-embed-text` (768D) |
 | **RAG Pipeline** | Ask questions about your documents → HNSW retrieves context → local LLM answers |
 | **Full REST API** | CRUD endpoints: insert, delete, search, benchmark, hnsw-info |
+| **Java Implementation** | Pure Java with no external dependencies, uses built-in HTTP server |
 
 ---
 
@@ -30,7 +31,7 @@ Your Text
 Ollama (nomic-embed-text)          ← converts text to a 768-dimensional vector
     │
     ▼
-HNSW Index (C++)                   ← indexes the vector in a multilayer graph
+HNSW Index (Java)                  ← indexes the vector in a multilayer graph
     │
     ▼
 Semantic Search                    ← finds nearest neighbors in vector space
@@ -48,43 +49,37 @@ Answer
 
 ## Prerequisites
 
-You need **3 things** installed on your Windows laptop:
+You need **2 things** installed on your system:
 
-1. **MSYS2** (gives you g++ compiler)
-2. **Git**
-3. **Ollama** (runs the local AI models)
+1. **Java 11+** (JDK for compilation)
+2. **Ollama** (runs the local AI models)
+3. **Git** (for cloning the repository)
 
 ---
 
-## Step-by-Step Setup (Windows)
+## Step-by-Step Setup
 
-### Step 1 — Install MSYS2 (C++ Compiler)
+### Step 1 — Install Java (JDK)
 
-1. Go to **https://www.msys2.org** and download the installer
-2. Run the installer, keep default path (`C:\msys64`)
-3. After install, open **MSYS2 UCRT64** from Start Menu (the orange icon)
-4. Run these commands inside the MSYS2 terminal:
-
-```bash
-pacman -Syu
-```
-*(Close and reopen the terminal if it asks you to)*
-
-```bash
-pacman -S mingw-w64-ucrt-x86_64-gcc
-```
-
-5. Add g++ to your Windows PATH:
-   - Press `Win + R`, type `sysdm.cpl`, press Enter
-   - Click **Advanced** → **Environment Variables**
-   - Under **System variables**, find **Path**, click **Edit**
-   - Click **New** and add: `C:\msys64\ucrt64\bin`
-   - Click OK on all windows
-   - **Open a new PowerShell** and verify:
+**Windows:**
+1. Go to **https://adoptium.net** and download **Temurin JDK 11+**
+2. Run the installer with default settings
+3. Open **Command Prompt** or **PowerShell** and verify:
    ```
-   g++ --version
+   java -version
+   javac -version
    ```
-   You should see something like `g++ (GCC) 15.x.x`
+
+**macOS:**
+```bash
+brew install openjdk@11
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install openjdk-11-jdk
+```
 
 ---
 
@@ -106,18 +101,18 @@ git --version
 3. Ollama starts automatically in the system tray
 4. Open **PowerShell** and pull the two required models:
 
-```powershell
+```bash
 ollama pull nomic-embed-text
 ```
 *(~274 MB — this is the embedding model)*
 
-```powershell
+```bash
 ollama pull llama3.2
 ```
 *(~2 GB — this is the language model)*
 
 5. Verify Ollama is running:
-```powershell
+```bash
 ollama list
 ```
 You should see both models listed.
@@ -128,9 +123,9 @@ You should see both models listed.
 
 ### Step 4 — Clone the Repository
 
-Open **PowerShell** and run:
+Open **Command Prompt**, **PowerShell**, or **Terminal** and run:
 
-```powershell
+```bash
 git clone https://github.com/YOUR_USERNAME/VectorDB.git
 cd VectorDB
 ```
@@ -139,34 +134,34 @@ cd VectorDB
 
 ---
 
-### Step 5 — Compile the C++ Server
+### Step 5 — Compile the Java Server
 
 Inside the `VectorDB` folder, run:
 
-```powershell
-g++ -std=c++17 -O2 main.cpp -o db -lws2_32
+```bash
+javac main.java
 ```
 
-This produces `db.exe`. It takes about 10–20 seconds.
+This produces `main.class`. It takes about 5–10 seconds.
 
 > **Troubleshooting:**
-> - `g++: command not found` → MSYS2 not in PATH, redo Step 1 point 5
-> - `undefined reference to WSA...` → missing `-lws2_32` flag, add it
-> - Takes too long? Remove `-O2` for faster (but slower executable) compile
+> - `javac: command not found` → Java JDK not installed or not in PATH, redo Step 1
+> - `error: package com.sun.net.httpserver does not exist` → Use Java 11+ (this package is built-in)
+> - Takes too long? Normal for first compilation
 
 ---
 
 ### Step 6 — Run Everything
 
 **Terminal 1** — Start Ollama (if not already running):
-```powershell
+```bash
 ollama serve
 ```
-*(If Ollama is already in the system tray, skip this)*
+*(If Ollama is already running in the background, skip this)*
 
 **Terminal 2** — Start the VectorDB server:
-```powershell
-./db
+```bash
+java main
 ```
 
 You should see:
@@ -253,15 +248,15 @@ The server exposes a full REST API at `http://localhost:8080`.
 
 ### Example: Search via curl
 
-```powershell
+```bash
 curl "http://localhost:8080/search?v=0.9,0.8,0.7,0.6,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1&k=3&metric=cosine&algo=hnsw"
 ```
 
 ### Example: Ask a question via curl
 
-```powershell
-curl -X POST http://localhost:8080/doc/ask `
-  -H "Content-Type: application/json" `
+```bash
+curl -X POST http://localhost:8080/doc/ask \
+  -H "Content-Type: application/json" \
   -d '{"question":"What is dynamic programming?","k":3}'
 ```
 
@@ -271,22 +266,9 @@ curl -X POST http://localhost:8080/doc/ask `
 
 ```
 VectorDB/
-├── main.cpp        ← C++ backend (HNSW, KD-Tree, BruteForce, REST API, RAG)
-├── httplib.h       ← Single-header HTTP server library (cpp-httplib)
+├── main.java       ← Java backend (HNSW, KD-Tree, BruteForce, REST API, RAG)
 ├── index.html      ← Frontend (PCA scatter plot, chat UI, benchmark)
 └── README.md       ← This file
-```
-
-### Architecture (main.cpp)
-
-```
-BruteForce          O(N·d)      Exact, baseline
-KDTree              O(log N)    Exact, axis-aligned partitioning
-HNSW                O(log N)    Approximate, multilayer small-world graph
-
-VectorDB            Unified interface over all 3 (16D demo vectors)
-DocumentDB          HNSW-only index for real Ollama embeddings (768D)
-OllamaClient        HTTP client → /api/embeddings + /api/generate
 ```
 
 ---
@@ -321,21 +303,21 @@ KD-Tree pruning relies on axis-aligned distance bounds. In high dimensions, almo
 |---|---|
 | `Ollama: OFFLINE` in header | Run `ollama serve` in a terminal |
 | Embedding takes forever | Ollama is downloading the model on first use, wait 2 min |
-| `g++: command not found` | Add `C:\msys64\ucrt64\bin` to Windows PATH |
-| Port 8080 already in use | Kill the process: `netstat -ano \| findstr 8080` then `taskkill /PID <pid> /F` |
+| `javac: command not found` | Add Java JDK to PATH or reinstall from adoptium.net |
+| Port 8080 already in use | Kill the process: `netstat -ano | findstr 8080` then `taskkill /PID <pid> /F` (Windows) or `lsof -ti:8080 | xargs kill -9` (macOS/Linux) |
 | LLM answer is slow | Normal — llama3.2 takes 10–30s on a laptop CPU. Use llama3.2:1b for faster answers |
 
 ### Use a Smaller/Faster LLM
 
 If llama3.2 is too slow on your laptop, switch to the 1B model:
 
-```powershell
+```bash
 ollama pull llama3.2:1b
 ```
 
-Then edit [main.cpp](main.cpp) line where `genModel` is set:
-```cpp
-std::string genModel = "llama3.2:1b";   // change this
+Then edit [main.java](main.java) line where `genModel` is set:
+```java
+String genModel = "llama3.2:1b";   // change this
 ```
 Recompile and restart.
 
