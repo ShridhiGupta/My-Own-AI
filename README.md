@@ -317,7 +317,7 @@ ollama pull llama3.2:1b
 
 Then edit [main.java](main.java) line where `genModel` is set:
 ```java
-String genModel = "llama3.2:1b";   // change this
+String genModel = "llama3.2:1b";
 ```
 Recompile and restart.
 
