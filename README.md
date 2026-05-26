@@ -325,4 +325,6 @@ Recompile and restart.
 
 ## License
 
-MIT — use this however you want.
+This project is licensed under the **MIT License** — feel free to use, modify, and distribute it with proper attribution.
+
+See the [LICENSE](LICENSE) file for more details.
